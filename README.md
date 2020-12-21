@@ -40,6 +40,6 @@ in the `config/bundles.php` file of your project:
 
 return [
     // ...
-    Developersnl\BullhornClientBundle\DevelopersnlBullhornClientBundle::class => ['all' => true],
+    Developersnl\BullhornClientBundle\BullhornClientBundle::class => ['all' => true],
 ];
 ```
