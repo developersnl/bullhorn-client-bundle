@@ -7,6 +7,7 @@ use Developersnl\BullhornClientBundle\Client\RestClient;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Extension\Extension;
+use Symfony\Component\DependencyInjection\Reference;
 
 class BullhornClientExtension extends Extension
 {
@@ -15,8 +16,17 @@ class BullhornClientExtension extends Extension
         $configuration = new Configuration();
         $config = $this->processConfiguration($configuration, $configs);
 
-        $authentication = new Definition(AuthenticationClient::class, $config['authentication']);
-        $rest = new Definition(RestClient::class, $config['rest']);
+        $authentication = new Definition(AuthenticationClient::class);
+        $authentication->setArgument('$clientId', $config['authentication']['clientId']);
+        $authentication->setArgument('$clientSecret', $config['authentication']['clientSecret']);
+        $authentication->setArgument('$authUrl', $config['authentication']['authUrl']);
+        $authentication->setArgument('$tokenUrl', $config['authentication']['tokenUrl']);
+        $authentication->setArgument('$loginUrl', $config['authentication']['loginUrl']);
+        $authentication->setArgument('$cache', new Reference('cache'));
+
+        $rest = new Definition(RestClient::class);
+        $rest->setArgument('$username', $config['rest']['username']);
+        $rest->setArgument('$password', $config['rest']['password']);
 
         $container->setDefinition('developersnl.bullhorn_client.authentication', $authentication);
         $container->setDefinition('developersnl.bullhorn_client.rest', $rest);
