@@ -25,6 +25,8 @@ class BullhornClientExtension extends Extension
         $authentication->setArgument('$cache', new Reference('cache'));
 
         $rest = new Definition(RestClient::class);
+        $rest->setArgument('$authClient', new Reference('Developersnl\BullhornClientBundle\Client\AuthenticationClient'));
+        $rest->setArgument('$cache', new Reference('cache'));
         $rest->setArgument('$username', $config['rest']['username']);
         $rest->setArgument('$password', $config['rest']['password']);
 
