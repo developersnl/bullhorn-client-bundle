@@ -18,7 +18,7 @@ class BullhornClientExtension extends Extension
         $authentication = new Definition(AuthenticationClient::class, $config['authentication']);
         $rest = new Definition(RestClient::class, $config['rest']);
 
-        $container->setDefinition('bullhorn_client.authentication', $authentication);
-        $container->setDefinition('bullhorn_client.rest', $rest);
+        $container->setDefinition('developersnl.bullhorn_client.authentication', $authentication);
+        $container->setDefinition('developersnl.bullhorn_client.rest', $rest);
     }
 }
