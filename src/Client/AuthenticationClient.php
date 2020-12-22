@@ -7,13 +7,12 @@ use GuzzleHttp\Client as HttpClient;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use League\OAuth2\Client\Provider\GenericProvider as OAuth2Provider;
 use League\OAuth2\Client\Token\AccessTokenInterface;
-use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\UriInterface;
 use Snc\RedisBundle\Client\Phpredis\Client as RedisClient;
 use stdClass;
 
-class BullhornAuthClient
+class AuthenticationClient
 {
     /** @var string */
     protected $clientId;
@@ -40,7 +39,7 @@ class BullhornAuthClient
     private $lastResponseHeaders;
 
     /**
-     * BullhornAuthClient constructor.
+     * AuthenticationClient constructor.
      *
      * @param string $clientId
      * @param string $clientSecret
@@ -49,14 +48,8 @@ class BullhornAuthClient
      * @param string $loginUrl
      * @param RedisClient $redisClient
      */
-    public function __construct(
-        string $clientId,
-        string $clientSecret,
-        string $authUrl,
-        string $tokenUrl,
-        string $loginUrl,
-        RedisClient $redisClient
-    ) {
+    public function __construct(string $clientId, string $clientSecret, string $authUrl, string $tokenUrl, string $loginUrl, RedisClient $redisClient)
+    {
         $this->clientId = $clientId;
         $this->authUrl = $authUrl;
         $this->tokenUrl = $tokenUrl;
@@ -210,7 +203,6 @@ class BullhornAuthClient
 
         $fullUrl = $this->loginUrl . '?' . http_build_query($options);
 
-        /** @var RequestInterface $loginRequest */
         $loginRequest = $this->authProvider->getAuthenticatedRequest(
             'GET',
             $fullUrl,

@@ -6,35 +6,54 @@ use Exception;
 use GuzzleHttp\Client as HttpClient;
 use GuzzleHttp\Exception\ClientException;
 use stdClass;
+use Symfony\Contracts\Cache\CacheInterface;
+use Symfony\Contracts\Cache\ItemInterface;
 
-class BullhornRestClient
+class RestClient
 {
-    /** @var BullhornAuthClient */
+    /** @var AuthenticationClient */
     protected $authClient;
 
     /** @var HttpClient */
     protected $httpClient;
 
+    /** @var CacheInterface */
+    protected $cache;
+
+    /** @var int */
+    protected $ttl;
+
+    /** @var string */
+    protected $username;
+
+    /** @var string */
+    protected $password;
+
     /** @var array */
     protected $options;
 
     /**
-     * BullhornRestClient constructor.
+     * RestClient constructor.
      *
+     * @param AuthenticationClient $authClient
+     * @param CacheInterface $cache
+     * @param string $username
+     * @param string $password
+     * @param int $ttl
      * @param array $options
-     * @param BullhornAuthClient $authClient
      */
-    public function __construct(BullhornAuthClient $authClient, array $options = [])
+    public function __construct(AuthenticationClient $authClient, CacheInterface $cache, string $username, string $password, int $ttl = 300, array $options = [])
     {
         $this->authClient = $authClient;
-
-        $defaultOptions = [
-            'autoRefresh' => true,
-            'maxSessionRetry' => 5
-        ];
-
+        $this->cache = $cache;
+        $this->username = $username;
+        $this->password = $password;
+        $this->ttl = $ttl;
         $this->options = array_merge(
-            $defaultOptions,
+            [
+                'autoRefresh' => true,
+                'maxSessionRetry' => 5
+            ],
             $options
         );
     }
@@ -46,12 +65,9 @@ class BullhornRestClient
      * @return void
      * @throws Exception
      */
-    public function initiateSession(
-        string $username,
-        string $password,
-        array $options = []
-    ): void {
-        $gotSession = false;
+    public function initiateSession(string $username, string $password, array $options = []): void
+    {
+        $session = false;
         $tries = 0;
         do {
             try {
@@ -60,7 +76,7 @@ class BullhornRestClient
                     $password,
                     $options
                 );
-                $gotSession = true;
+                $session = true;
             } catch (Exception $e) {
                 ++$tries;
                 if ($tries >= $this->options['maxSessionRetry']) {
@@ -68,7 +84,7 @@ class BullhornRestClient
                 }
                 usleep(1500000);
             }
-        } while (!$gotSession);
+        } while (!$session);
 
         $this->httpClient = new HttpClient([
             'base_uri' => $this->authClient->getRestUrl()
@@ -77,7 +93,7 @@ class BullhornRestClient
 
     /**
      * @param array $options
-     * @throws \Exception
+     *
      * @return void
      */
     public function refreshSession(array $options = []): void
@@ -91,19 +107,17 @@ class BullhornRestClient
     /**
      * @param string $method
      * @param string $url
-     * @param array $options
-     * @param array $headers
+     * @param array  $options
+     * @param array  $headers
+     *
      * @return stdClass
      * @throws \Exception
      */
-    public function request(
-        string $method,
-        string $url,
-        array $options = [],
-        array $headers = []
-    ): ?stdClass {
-        $fullHeaders = $this->appendDefaultHeadersTo($headers);
-        $options['headers'] = $fullHeaders;
+    public function request(string $method, string $url, array $options = [], array $headers = []): ?stdClass
+    {
+        $this->initiateSession($this->username, $this->password);
+
+        $options['headers'] = $this->appendDefaultHeadersTo($headers);
         try {
             $response = $this->httpClient->request(
                 $method,
@@ -150,6 +164,7 @@ class BullhornRestClient
     protected function handleExpiredSessionOnRequest(array $request): stdClass
     {
         $this->refreshSession();
+
         return $this->request(
             $request['method'],
             $request['url'],
@@ -164,12 +179,26 @@ class BullhornRestClient
      */
     protected function appendDefaultHeadersTo(array $headers): array
     {
-        $defaultHeaders = [
-            'BhRestToken' => $this->authClient->getRestToken()
-        ];
         return array_merge(
             $headers,
-            $defaultHeaders
+            [
+                'BhRestToken' => $this->authClient->getRestToken()
+            ]
         );
+    }
+
+    /**
+     * @param string $url
+     * @param bool $cache
+     *
+     * @return array
+     */
+    public function get(string $url, bool $cache = true): array
+    {
+        return $cache
+            ? $this->cache->get(sha1($url), function (ItemInterface $item) use ($url) {
+                return json_encode($this->request('GET', $url), JSON_THROW_ON_ERROR, 512);
+            })
+            : json_decode(json_encode($this->request('GET', $url), JSON_THROW_ON_ERROR, 512), true, 512, JSON_THROW_ON_ERROR);
     }
 }
