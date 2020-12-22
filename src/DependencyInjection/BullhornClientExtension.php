@@ -28,7 +28,7 @@ class BullhornClientExtension extends Extension
         $rest->setArgument('$username', $config['rest']['username']);
         $rest->setArgument('$password', $config['rest']['password']);
 
-        $container->setDefinition('developersnl.bullhorn_client.authentication', $authentication);
-        $container->setDefinition('developersnl.bullhorn_client.rest', $rest);
+        $container->setDefinition('Developersnl\BullhornClientBundle\Client\AuthenticationClient', $authentication);
+        $container->setDefinition('Developersnl\BullhornClientBundle\Client\RestClient', $rest);
     }
 }
