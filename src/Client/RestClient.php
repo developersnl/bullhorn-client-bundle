@@ -20,9 +20,6 @@ class RestClient
     /** @var CacheInterface */
     protected $cache;
 
-    /** @var int */
-    protected $ttl;
-
     /** @var string */
     protected $username;
 
@@ -39,16 +36,14 @@ class RestClient
      * @param CacheInterface $cache
      * @param string $username
      * @param string $password
-     * @param int $ttl
      * @param array $options
      */
-    public function __construct(AuthenticationClient $authClient, CacheInterface $cache, string $username, string $password, int $ttl = 300, array $options = [])
+    public function __construct(AuthenticationClient $authClient, CacheInterface $cache, string $username, string $password, array $options = [])
     {
         $this->authClient = $authClient;
         $this->cache = $cache;
         $this->username = $username;
         $this->password = $password;
-        $this->ttl = $ttl;
         $this->options = array_merge(
             [
                 'autoRefresh' => true,

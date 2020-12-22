@@ -9,8 +9,8 @@ use League\OAuth2\Client\Provider\GenericProvider as OAuth2Provider;
 use League\OAuth2\Client\Token\AccessTokenInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\UriInterface;
-use Snc\RedisBundle\Client\Phpredis\Client as RedisClient;
 use stdClass;
+use Symfony\Contracts\Cache\CacheInterface;
 
 class AuthenticationClient
 {
@@ -29,8 +29,8 @@ class AuthenticationClient
     /** @var string */
     protected $loginUrl;
 
-    /** @var RedisClient */
-    protected $redisClient;
+    /** @var CacheInterface */
+    protected $cache;
 
     /** @var string */
     private $lastResponseBody;
@@ -46,15 +46,15 @@ class AuthenticationClient
      * @param string $authUrl
      * @param string $tokenUrl
      * @param string $loginUrl
-     * @param RedisClient $redisClient
+     * @param CacheInterface $cache
      */
-    public function __construct(string $clientId, string $clientSecret, string $authUrl, string $tokenUrl, string $loginUrl, RedisClient $redisClient)
+    public function __construct(string $clientId, string $clientSecret, string $authUrl, string $tokenUrl, string $loginUrl, CacheInterface $cache)
     {
         $this->clientId = $clientId;
         $this->authUrl = $authUrl;
         $this->tokenUrl = $tokenUrl;
         $this->loginUrl = $loginUrl;
-        $this->redisClient = $redisClient;
+        $this->cache = $cache;
 
         $this->authProvider = new OAuth2Provider([
             'clientId' => $clientId,
@@ -70,7 +70,7 @@ class AuthenticationClient
      */
     public function getRestToken(): ?string
     {
-        return ($value = $this->redisClient->get($this->getRestTokenKey())) ? $value : null;
+        return ($value = $this->cache->get($this->getRestTokenKey())) ? $value : null;
     }
 
     /**
@@ -78,7 +78,7 @@ class AuthenticationClient
      */
     public function getRestUrl(): ?string
     {
-        return ($value = $this->redisClient->get($this->getRestUrlKey())) ? $value : null;
+        return ($value = $this->cache->get($this->getRestUrlKey())) ? $value : null;
     }
 
     /**
@@ -86,7 +86,7 @@ class AuthenticationClient
      */
     public function getRefreshToken(): ?string
     {
-        return ($value = $this->redisClient->get($this->getRefreshTokenKey())) ? $value : null;
+        return ($value = $this->cache->get($this->getRefreshTokenKey())) ? $value : null;
     }
 
     /**
@@ -314,7 +314,7 @@ class AuthenticationClient
      */
     public function refreshSession(array $options = []): void
     {
-        $refreshToken = $this->redisClient->get(
+        $refreshToken = $this->cache->get(
             $this->getRefreshTokenKey()
         );
         if (!isset($refreshToken)) {
