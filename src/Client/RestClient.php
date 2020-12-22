@@ -33,12 +33,12 @@ class RestClient
      * RestClient constructor.
      *
      * @param AuthenticationClient $authClient
-     * @param CacheInterface $cache
      * @param string $username
      * @param string $password
+     * @param CacheInterface $cache
      * @param array $options
      */
-    public function __construct(AuthenticationClient $authClient, CacheInterface $cache, string $username, string $password, array $options = [])
+    public function __construct(AuthenticationClient $authClient, string $username, string $password, CacheInterface $cache, array $options = [])
     {
         $this->authClient = $authClient;
         $this->cache = $cache;
