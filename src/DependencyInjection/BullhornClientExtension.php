@@ -22,11 +22,13 @@ class BullhornClientExtension extends Extension
         $authentication->setArgument('$authUrl', $config['authentication']['authUrl']);
         $authentication->setArgument('$tokenUrl', $config['authentication']['tokenUrl']);
         $authentication->setArgument('$loginUrl', $config['authentication']['loginUrl']);
+        $authentication->setAutowired(true);
 
         $rest = new Definition(RestClient::class);
         $rest->setArgument('$authClient', new Reference('Developersnl\BullhornClientBundle\Client\AuthenticationClient'));
         $rest->setArgument('$username', $config['rest']['username']);
         $rest->setArgument('$password', $config['rest']['password']);
+        $rest->setAutowired(true);
 
         $container->setDefinition('Developersnl\BullhornClientBundle\Client\AuthenticationClient', $authentication);
         $container->setDefinition('Developersnl\BullhornClientBundle\Client\RestClient', $rest);
