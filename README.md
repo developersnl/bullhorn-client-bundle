@@ -18,6 +18,21 @@ Open a command console, enter your project directory and execute:
 $ composer require developersnl/bullhorn-client-bundle
 ```
 
+Add a `config\packages\bullhorn_client.yaml` file to set the configuration for this client. The following configuration is required:
+
+```yaml
+bullhorn_client:
+  authentication:
+    clientId: ''
+    clientSecret: ''
+    authUrl: ''
+    tokenUrl: ''
+    loginUrl: ''
+  rest:
+    username: ''
+    password: ''
+```
+
 Applications that don't use Symfony Flex
 ----------------------------------------
 
