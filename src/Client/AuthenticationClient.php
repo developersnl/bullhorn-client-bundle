@@ -119,7 +119,10 @@ class AuthenticationClient
      */
     protected function storeData(string $name, $value): void
     {
-        $this->redisClient->set($name, $value);
+        $this->cache->delete($name);
+        $this->cache->get($name, function () use ($value) {
+            return $value;
+        });
     }
 
     /**
