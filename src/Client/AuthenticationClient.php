@@ -70,7 +70,7 @@ class AuthenticationClient
      */
     public function getRestToken(): ?string
     {
-        return ($value = $this->cache->get($this->getRestTokenKey())) ? $value : null;
+        return $this->cache->get($this->getRestTokenKey(), function () { return null; });
     }
 
     /**
@@ -78,7 +78,7 @@ class AuthenticationClient
      */
     public function getRestUrl(): ?string
     {
-        return ($value = $this->cache->get($this->getRestUrlKey())) ? $value : null;
+        return $this->cache->get($this->getRestUrlKey(), function () { return null; });
     }
 
     /**
@@ -86,7 +86,7 @@ class AuthenticationClient
      */
     public function getRefreshToken(): ?string
     {
-        return ($value = $this->cache->get($this->getRefreshTokenKey())) ? $value : null;
+        return $this->cache->get($this->getRefreshTokenKey(), function () { return null; });
     }
 
     /**
@@ -317,9 +317,7 @@ class AuthenticationClient
      */
     public function refreshSession(array $options = []): void
     {
-        $refreshToken = $this->cache->get(
-            $this->getRefreshTokenKey()
-        );
+        $refreshToken = $this->getRefreshToken();
         if (!isset($refreshToken)) {
             throw new Exception('attempted session refresh with invalid refresh token');
         }
