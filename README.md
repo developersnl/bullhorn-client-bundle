@@ -25,9 +25,9 @@ bullhorn_client:
   authentication:
     clientId: ''
     clientSecret: ''
-    authUrl: ''
-    tokenUrl: ''
-    loginUrl: ''
+    authUrl: 'https://auth-emea.bullhornstaffing.com/oauth/authorize'
+    tokenUrl: 'https://auth-emea.bullhornstaffing.com/oauth/token'
+    loginUrl: 'https://rest-emea.bullhornstaffing.com/rest-services/login'
   rest:
     username: ''
     password: ''
