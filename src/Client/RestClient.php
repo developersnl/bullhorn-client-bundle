@@ -190,10 +190,12 @@ class RestClient
      */
     public function get(string $url, bool $cache = true): array
     {
-        return $cache
+        $result = $cache
             ? $this->cache->get(sha1($url), function (ItemInterface $item) use ($url) {
                 return json_encode($this->request('GET', $url), JSON_THROW_ON_ERROR, 512);
             })
-            : json_decode(json_encode($this->request('GET', $url), JSON_THROW_ON_ERROR, 512), true, 512, JSON_THROW_ON_ERROR);
+            : json_encode($this->request('GET', $url), JSON_THROW_ON_ERROR, 512);
+
+        return json_decode($result, true, 512, JSON_THROW_ON_ERROR);
     }
 }
