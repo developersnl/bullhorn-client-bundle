@@ -272,7 +272,7 @@ class AuthenticationClient
         $this->lastResponseBody = $responseBody;
         $this->lastResponseHeaders = $response->getHeaders();
 
-        $locationHeader = $response->getHeaders()['Location'][0];
+        $locationHeader = $response->getHeaders()['location'][0];
 
         try {
             return $this->parseAuthorizationCodeFromUrl($locationHeader);
