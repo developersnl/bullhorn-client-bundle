@@ -262,17 +262,21 @@ class AuthenticationClient
             'password' => $password
         ]);
 
+        $locationHeader =  '';
         $response = $this->makeHttpRequest(
             $authRequest,
-            ['allow_redirects' => false]
+            [
+                'allow_redirects' => true,
+                'on_stats' => function ($stats) use (&$locationHeader) {
+                    $locationHeader = (string) $stats->getEffectiveUri();
+                }
+            ]
         );
         $responseBody = $response->getBody()->getContents();
         $this->checkAuthorizationErrors($responseBody);
 
         $this->lastResponseBody = $responseBody;
         $this->lastResponseHeaders = $response->getHeaders();
-
-        $locationHeader = $response->getHeader('location')[0];
 
         try {
             return $this->parseAuthorizationCodeFromUrl($locationHeader);
