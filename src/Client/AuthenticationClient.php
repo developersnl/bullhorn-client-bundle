@@ -272,6 +272,7 @@ class AuthenticationClient
                 }
             ]
         );
+
         $responseBody = $response->getBody()->getContents();
         $this->checkAuthorizationErrors($responseBody);
 
@@ -281,7 +282,21 @@ class AuthenticationClient
         try {
             return $this->parseAuthorizationCodeFromUrl($locationHeader);
         } catch (Exception $e) {
-            throw new Exception($e . ' From request: ' . $authRequest);
+            // fallback to plain cURL request
+            try {
+                $ch = curl_init($authRequest);
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+                curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+                curl_setopt($ch, CURLOPT_HEADER, true);
+                curl_setopt($ch, CURLOPT_NOBODY, false);
+                curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+                curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
+                $response = curl_exec($ch);
+
+                return $this->parseAuthorizationCodeFromUrl($response);
+            } catch (Exception $e) {
+                throw new Exception($e . ' From request: ' . $authRequest);
+            }
         }
     }
 
